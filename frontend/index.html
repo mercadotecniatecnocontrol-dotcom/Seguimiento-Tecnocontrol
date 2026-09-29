@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seguimiento TecnoControl</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="styles.css?v=14">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Signature Pad -->
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+    <!-- HTML5 Qrcode -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f7fd',
+                            100: '#dceef9',
+                            200: '#bedff3',
+                            300: '#90c8eb',
+                            400: '#5baade',
+                            500: '#368ccd',
+                            600: '#00488D', // Corporate Blue
+                            700: '#003a73',
+                            800: '#002c59',
+                            900: '#002042',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Hide Edge native password eye to use our custom one */
+        input[type="password"]::-ms-reveal,
+        input[type="password"]::-ms-clear {
+            display: none;
+        }
+
+        /* Contorno blanco sutil para el logo en modo oscuro */
+        .dark .dark-logo-outline {
+            filter: drop-shadow(0px 0px 1px rgba(255, 255, 255, 0.85));
+        }
+    </style>
+</head>
+
+<body
+    class="bg-slate-50 dark:bg-slate-900 text-gray-800 dark:text-gray-200 font-sans min-h-screen relative overflow-x-hidden selection:bg-brand-500 selection:text-white">
+
+    <!-- Navigation -->
+    <nav
+        class="bg-white dark:bg-slate-800 sticky top-0 z-40 border-b border-gray-200 dark:border-slate-700 dark:border-slate-700 shadow-sm transition-colors duration-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex-shrink-0 flex items-center gap-4">
+                    <img src="logotecno.png" alt="Logo TecnoControl"
+                        class="h-10 w-auto object-contain dark-logo-outline transition-all duration-300">
+                    <div class="hidden md:block h-6 w-px bg-gray-300 dark:bg-slate-600"></div>
+                    <span class="hidden md:block text-gray-600 dark:text-gray-400 font-medium tracking-wide">Sistema de
+                        Control</span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button id="btnDarkMode"
+                        class="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:text-white dark:text-gray-400 dark:hover:text-white transition-colors rounded-full hover:bg-gray-100 dark:hover:bg-slate-700 focus:outline-none">
+                        <svg id="iconMoon" class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z">
+                            </path>
+                        </svg>
+                        <svg id="iconSun" class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
+                            </path>
+                        </svg>
+                    </button>
+                    <button id="btnLogout" class="text-sm text-red-600 hover:text-red-800 font-medium hidden">Cerrar
+                        Sesión</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Dashboard Header -->
+        <div
+            class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 bg-white dark:bg-slate-800 p-6 rounded-xl border border-gray-200 dark:border-slate-700 shadow-sm">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Registro de Equipos y
+                    Herramienta</h1>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Gestione el inventario escaneando o ingresando
+                    el número de serie.</p>
+            </div>
+            <div class="w-full md:w-auto group">
+                <button id="btnRegisterEquipment"
+                    class="w-full md:w-auto px-5 py-2.5 rounded-lg bg-brand-600 text-white font-medium hover:bg-brand-700 focus:ring-4 focus:ring-brand-500/20 transition-colors shadow-sm flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    Nuevo Registro
+                </button>
+            </div>
+        </div>
+
+        <!-- Metrics Dashboard -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div
+                class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5 shadow-sm flex items-center gap-4">
+                <div class="p-3 bg-brand-50 rounded-lg text-brand-600">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Equipos</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white" id="metricTotal">0</p>
+                </div>
+            </div>
+            <div
+                class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5 shadow-sm flex items-center gap-4">
+                <div class="p-3 bg-emerald-50 rounded-lg text-emerald-600">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">En Inventario (Recibidos)</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white" id="metricReceived">0</p>
+                </div>
+            </div>
+            <div
+                class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5 shadow-sm flex items-center gap-4">
+                <div class="p-3 bg-amber-50 rounded-lg text-amber-600">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Equipos Despachados</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white" id="metricDispatched">0</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table Toolbar -->
+        <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
+            <div class="relative w-full sm:w-96">
+                <input type="text" id="tableSearch" placeholder="Buscar por serie o artículo..."
+                    class="w-full pl-10 pr-4 py-2 border border-gray-200 dark:border-slate-700 rounded-lg text-sm focus:ring-brand-500 focus:border-brand-500 bg-white dark:bg-slate-800 outline-none transition-shadow hover:shadow-sm">
+                <svg class="w-5 h-5 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+            </div>
+            <div class="flex gap-2 w-full sm:w-auto">
+                <button id="btnGlobalHistory"
+                    class="w-full sm:w-auto px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg flex items-center justify-center gap-2 transition-colors shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Historial Global
+                </button>
+                <button id="btnExportExcel"
+                    class="w-full sm:w-auto px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg flex items-center justify-center gap-2 transition-colors shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z">
+                        </path>
+                    </svg>
+                    Exportar Excel
+                </button>
+            </div>
+        </div>
+
+        <div
+            class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden relative z-10">
+            <div id="mobileEquipmentList" class="md:hidden flex flex-col p-4 gap-4 bg-gray-50 dark:bg-slate-900/50">
+                <div class="text-center py-10 text-gray-400 font-medium text-sm">Cargando equipos...</div>
+            </div>
+
+            <div class="hidden md:block overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-slate-700">
+                    <thead class="bg-gray-50 dark:bg-slate-900/50">
+                        <tr>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                                Serie / Artículo</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                                Estado</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                                Receptor / Dpto</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                                Despachador / Dpto</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-center text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                                Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="desktopEquipmentTableBody"
+                        class="bg-white dark:bg-slate-800 divide-y divide-gray-200 dark:divide-slate-700 relative">
+                        <!-- Rows will be injected here via JS -->
+                        <tr>
+                            <td colspan="5" class="px-6 py-10 text-center text-gray-400 font-medium text-sm">Cargando
+                                equipos...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="mt-4 flex justify-between items-center text-xs text-gray-500 dark:text-gray-400 px-2">
+            <p>Seleccione una fila para ver los detalles.</p>
+            <p>TecnoControl &copy; 2026</p>
+        </div>
+    </main>
+
+    <div id="loginOverlay"
+        class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[100] flex items-center justify-center p-4 transition-opacity duration-300">
+        <div
+            class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all">
+            <div class="p-8">
+                <div class="text-center mb-8">
+                    <img src="logotecno.png" alt="Logo TecnoControl"
+                        class="h-16 mx-auto mb-4 object-contain dark-logo-outline transition-all duration-300">
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Iniciar Sesión</h2>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm mt-2">Ingresa tus credenciales para acceder</p>
+                </div>
+                <form id="loginForm" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Usuario
+                            (Nombre)</label>
+                        <input type="text" id="loginUsername" required
+                            class="block w-full px-4 py-3 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-brand-500 focus:border-brand-500 bg-gray-50 dark:bg-slate-900/50 outline-none transition-all">
+                    </div>
+                    <div>
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Contraseña</label>
+                        <div class="relative">
+                            <input type="password" id="loginPassword" required
+                                class="block w-full px-4 py-3 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-brand-500 focus:border-brand-500 bg-gray-50 dark:bg-slate-900/50 outline-none transition-all pr-12">
+                            <button type="button" id="btnTogglePassword"
+                                class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 dark:text-gray-400 focus:outline-none transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" id="btnLoginSubmit"
+                        class="w-full px-6 py-3 rounded-xl bg-brand-600 text-white font-semibold hover:bg-brand-700 focus:ring-4 focus:ring-brand-500/30 transition-all shadow-md flex items-center justify-center gap-2">
+                        Ingresar
+                    </button>
+                    <p id="loginError" class="text-red-500 text-sm text-center hidden">Credenciales inválidas</p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalOverlay"
+        class="fixed inset-0 bg-gray-900/40 backdrop-blur-md z-50 hidden opacity-0 transition-opacity duration-300 flex items-end md:items-center justify-center p-0 md:p-4">
+
+        <div id="barcodeModal"
+            class="bg-white dark:bg-slate-800 rounded-t-2xl md:rounded-xl shadow-xl w-full max-w-xl transform translate-y-full md:translate-y-0 md:scale-95 opacity-0 transition-all duration-300 hidden flex flex-col overflow-hidden max-h-[95vh] md:max-h-[90vh]">
+            <div class="p-6 border-b border-gray-100 dark:border-slate-700/50 flex justify-between items-center">
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Ingresar Código de Barras</h3>
+                <button type="button"
+                    class="btn-cancel text-gray-400 hover:text-gray-600 dark:text-gray-400 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="p-8 overflow-y-auto custom-scrollbar">
+
+                <div class="flex flex-col items-center mb-2">
+                    <div class="mb-8 w-full">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Opción 1: Captura
+                            de Código</label>
+
+                        <label for="nativeCameraInput"
+                            class="md:hidden flex items-center justify-center w-full px-6 py-4 bg-gray-50 dark:bg-slate-900/50 border-2 border-dashed border-gray-300 rounded-xl hover:bg-gray-100 hover:border-brand-400 transition-all cursor-pointer group mb-4">
+                            <div class="text-center">
+                                <div
+                                    class="bg-white dark:bg-slate-800 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm group-hover:scale-110 transition-transform">
+                                    <svg class="w-6 h-6 text-brand-600" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z">
+                                        </path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    </svg>
+                                </div>
+                                <span class="font-medium text-gray-900 dark:text-white block">Abrir Cámara</span>
+                                <span class="text-xs text-gray-500 dark:text-gray-400 mt-1 block">Toma una foto al
+                                    código</span>
+                            </div>
+                        </label>
+
+                        <div class="hidden md:flex flex-col gap-4">
+                            <label for="pcFileInput"
+                                class="flex items-center justify-center w-full px-6 py-4 bg-gray-50 dark:bg-slate-900/50 border-2 border-dashed border-gray-300 rounded-xl hover:bg-gray-100 hover:border-brand-400 transition-all cursor-pointer group">
+                                <div class="text-center">
+                                    <div
+                                        class="bg-white dark:bg-slate-800 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm group-hover:scale-110 transition-transform">
+                                        <svg class="w-6 h-6 text-brand-600" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12">
+                                            </path>
+                                        </svg>
+                                    </div>
+                                    <span class="font-medium text-gray-900 dark:text-white block">Subir Archivo de
+                                        Imagen</span>
+                                    <span class="text-xs text-gray-500 dark:text-gray-400 mt-1 block">Selecciona una
+                                        foto de tu
+                                        disco</span>
+                                </div>
+                            </label>
+                        </div>
+
+                        <input type="file" id="nativeCameraInput" accept="image/*" capture="environment" class="hidden">
+                        <input type="file" id="pcFileInput" accept="image/*" class="hidden">
+                    </div>
+
+                    <div class="flex items-center w-full mb-8">
+                        <div class="flex-grow border-t border-gray-200 dark:border-slate-700"></div>
+                        <span class="px-4 text-xs text-gray-400 font-medium uppercase tracking-wider">O escríbelo
+                            manual</span>
+                        <div class="flex-grow border-t border-gray-200 dark:border-slate-700"></div>
+                    </div>
+
+                    <div class="w-full">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Número de Serie
+                            (Manual o Lector
+                            USB)</label>
+                        <input type="text" id="manualBarcodeInput"
+                            class="block w-full px-4 py-3 border border-gray-200 dark:border-slate-700 rounded-xl text-gray-900 dark:text-white focus:ring-brand-500 focus:border-brand-500 bg-gray-50 dark:bg-slate-900/50 outline-none transition-all font-mono text-lg"
+                            placeholder="Ej. TCN-001">
+                    </div>
+                </div>
+                <div class="flex justify-end mt-8">
+                    <button type="button" id="btnSubmitManualBarcode"
+                        class="px-6 py-3 rounded-lg bg-brand-600 text-white font-medium hover:bg-brand-700 focus:ring-4 focus:ring-brand-500/30 transition-all shadow-md text-lg w-full md:w-auto">Siguiente
+                        Paso</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="signatureModal"
+            class="bg-white dark:bg-slate-800 rounded-t-2xl md:rounded-xl shadow-xl w-full max-w-lg transform translate-y-full md:translate-y-0 md:scale-95 opacity-0 transition-all duration-300 hidden flex flex-col overflow-hidden max-h-[95vh] md:max-h-[90vh]">
+            <div
+                class="p-6 border-b border-gray-100 dark:border-slate-700/50 flex justify-between items-center bg-gray-50 dark:bg-slate-900/50 shrink-0">
+                <div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white" id="signatureSubtitle">Firma Digital
+                    </h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1" id="signatureSerialDisplay"></p>
+                </div>
+                <button type="button"
+                    class="btn-cancel text-gray-400 hover:text-gray-600 dark:text-gray-400 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg>
+                </button>
+            </div>
+            <div class="p-6 flex-1 flex flex-col custom-scrollbar overflow-y-auto">
+                <div class="mb-4" id="articleNameContainer">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nombre del Artículo
+                        (Equipo) <span class="text-red-500">*</span></label>
+                    <input type="text" id="actionArticleName"
+                        class="block w-full px-4 py-3 border border-gray-200 dark:border-slate-700 rounded-xl text-gray-900 dark:text-white focus:ring-brand-500 focus:border-brand-500 bg-gray-50 dark:bg-slate-900/50 outline-none transition-all font-medium"
+                        placeholder="Ej. Laptop Dell Latitude">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nombre Completo del
+                        Empleado <span class="text-red-500">*</span></label>
+                    <input type="text" id="actionEmployeeName"
+                        class="block w-full px-4 py-3 border border-gray-200 dark:border-slate-700 rounded-xl text-gray-900 dark:text-white focus:ring-brand-500 focus:border-brand-500 bg-gray-50 dark:bg-slate-900/50 outline-none transition-all font-medium"
+                        placeholder="Ej. Juan Pérez">
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Departamento
+                        (Opcional)</label>
+                    <input type="text" id="actionEmployeeDept"
+                        class="block w-full px-4 py-3 border border-gray-200 dark:border-slate-700 rounded-xl text-gray-900 dark:text-white focus:ring-brand-500 focus:border-brand-500 bg-gray-50 dark:bg-slate-900/50 outline-none transition-all"
+                        placeholder="Ej. Soporte Técnico">
+                </div>
+
+                <!-- Extra Details Form -->
+                <div class="space-y-4 border-t border-gray-100 dark:border-slate-700/50 pt-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Estado Físico del
+                            Equipo <span class="text-red-500">*</span></label>
+                        <select id="actionCondition"
+                            class="block w-full px-4 py-3 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-brand-500 focus:border-brand-500 bg-gray-50 dark:bg-slate-900/50 outline-none transition-all">
+                            <option value="Nuevo">Nuevo</option>
+                            <option value="Excelente">Excelente</option>
+                            <option value="Bueno" selected>Bueno</option>
+                            <option value="Regular">Regular</option>
+                            <option value="Malo">Malo</option>
+                            <option value="Dañado">Dañado</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Evidencia
+                            Fotográfica
+                            (Opcional)</label>
+                        <label for="actionPhoto"
+                            class="flex items-center justify-center w-full px-4 py-3 border border-gray-200 dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-900/50 hover:bg-gray-100 cursor-pointer transition-colors text-sm text-gray-700 dark:text-gray-300 font-medium gap-2">
+                            <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z">
+                                </path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            Tomar / Subir Foto
+                        </label>
+                        <input type="file" id="actionPhoto" accept="image/*" capture="environment" class="hidden">
+                        <p id="actionPhotoName" class="text-xs text-brand-600 mt-1 hidden"></p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Observaciones
+                            (Opcional)</label>
+                        <textarea id="actionObservations" rows="2"
+                            class="block w-full px-4 py-2 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-brand-500 focus:border-brand-500 bg-gray-50 dark:bg-slate-900/50 outline-none resize-none transition-all"
+                            placeholder="Detalles de daños, accesorios..."></textarea>
+                    </div>
+                </div>
+
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 mt-4">Firma Digital <span
+                        class="text-red-500">*</span></label>
+                <div
+                    class="relative rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 dark:bg-slate-900/50 h-48 shrink-0 overflow-hidden group mb-6">
+                    <canvas id="signatureCanvas"
+                        class="absolute inset-0 w-full h-full cursor-crosshair touch-none bg-white"></canvas>
+                    <div
+                        class="absolute bottom-2 right-2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button type="button" id="clearSignatureBtn"
+                            class="bg-white dark:bg-slate-800 text-gray-500 dark:text-gray-400 text-xs px-3 py-1.5 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 hover:text-red-500 font-medium">Limpiar
+                            Firma</button>
+                    </div>
+                </div>
+                <div
+                    class="flex justify-end gap-3 mt-auto pt-4 border-t border-gray-100 dark:border-slate-700/50 shrink-0">
+                    <button type="button"
+                        class="btn-cancel px-5 py-2.5 rounded-lg border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-50 dark:bg-slate-900/50 transition-colors">Cancelar</button>
+                    <button type="button" id="saveSignatureBtn"
+                        class="px-5 py-2.5 rounded-lg bg-gray-900 text-white font-medium hover:bg-black focus:ring-4 focus:ring-gray-900/30 transition-all shadow-md">Confirmar
+                        Acción</button>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Global History Modal -->
+        <div id="globalHistoryModal"
+            class="bg-white dark:bg-slate-800 rounded-t-2xl md:rounded-xl shadow-xl w-full max-w-3xl transform translate-y-full md:translate-y-0 md:scale-95 opacity-0 transition-all duration-300 hidden overflow-hidden flex flex-col max-h-[95vh] md:max-h-[90vh]">
+            <div
+                class="p-6 border-b border-gray-100 dark:border-slate-700/50 flex justify-between items-center bg-indigo-50 dark:bg-indigo-900/20">
+                <div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                        <svg class="w-6 h-6 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Historial Global de Movimientos
+                    </h3>
+                    <p class="text-sm text-gray-500 dark:text-indigo-200 mt-1">Últimos 100 movimientos de todas las herramientas</p>
+                </div>
+                <button type="button"
+                    class="btn-cancel text-gray-400 hover:text-gray-600 dark:text-gray-400 transition-colors bg-white dark:bg-slate-800 rounded-full p-2 shadow-sm border border-gray-100 dark:border-slate-700/50">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto flex-1 custom-scrollbar bg-gray-50 dark:bg-slate-900/50">
+                <div class="relative border-l-2 border-gray-200 dark:border-slate-700 ml-3 space-y-6" id="globalHistoryTimeline">
+                    <!-- Global history items will be injected here -->
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div id="contextMenu"
+        class="fixed z-[100] w-56 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-gray-200 dark:border-slate-700 py-1 hidden opacity-0 transform scale-95 transition-all duration-150 origin-top-left">
+        <button id="ctxViewDetails"
+            class="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-brand-50 hover:text-brand-600 transition-colors flex items-center gap-3">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
+                </path>
+            </svg>
+            Ver Detalles Completos
+        </button>
+        <button id="ctxCopySerial"
+            class="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:bg-slate-900/50 transition-colors flex items-center gap-3">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z">
+                </path>
+            </svg>
+            Copiar Número de Serie
+        </button>
+    </div>
+
+    <div id="toastContainer" class="fixed bottom-4 right-4 z-[60] flex flex-col gap-2"></div>
+
+    <div id="qr-reader-hidden" class="hidden"></div>
+    <script type="text/javascript" src="https://unpkg.com/@zxing/browser@latest"></script>
+    <script src="app.js?v=36"></script>
+</body>
+
+</html>

@@ -1,0 +1,54 @@
+/* Custom scrollbar for webkit */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: #94a3b8;
+}
+
+/* Modal Open state classes for JS toggling */
+.modal-active {
+    display: flex !important;
+}
+.modal-visible {
+    opacity: 1 !important;
+}
+.modal-scale-100 {
+    transform: translateY(0) scale(1) !important;
+}
+
+/* Canvas fix to ensure resizing works properly */
+#signatureCanvas {
+    touch-action: none; /* Prevent scrolling when signing on touch devices */
+}
+
+/* Table row hover state for better UX */
+tbody tr {
+    transition: background-color 0.2s ease;
+}
+tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+/* Toast animation */
+@keyframes slideUpFade {
+    from {
+        opacity: 0;
+        transform: translateY(1rem);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+.toast-enter {
+    animation: slideUpFade 0.3s ease forwards;
+}
