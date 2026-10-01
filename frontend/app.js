@@ -699,9 +699,6 @@ function openModal(modalElement) {
     modalOverlay.classList.add('modal-visible');
     setTimeout(() => {
         modalElement.classList.add('modal-visible', 'modal-scale-100');
-        if (modalElement === authModal) {
-            document.getElementById('empId').focus();
-        }
     }, 10);
 }
 
@@ -755,6 +752,80 @@ function hideContextMenu() {
     }, 150);
 }
 
+
+
+// --- Details Modal ---
+
+async function showDetailsModal(serial) {
+    if(!detailsModal) return;
+    openModal(detailsModal);
+    document.getElementById('detailSerial').textContent = `Serie: ${serial}`;
+    const timeline = document.getElementById('historyTimeline');
+    timeline.innerHTML = '<div class="text-sm text-gray-500 dark:text-gray-400 pl-4">Cargando detalles...</div>';
+
+    try {
+        const res = await apiFetch(`/equipment/${serial}/history`);
+        if (!res.ok) throw new Error('Not found');
+        const eq = await res.json();
+
+        document.getElementById('detailSerial').textContent = eq.article_name ? `Serie: ${serial} - ${eq.article_name}` : `Serie: ${serial}`;
+        document.getElementById('detailStatusBadge').textContent = `Estado actual: ${eq.status} | Físico: ${eq.condition || 'No registrado'}`;
+
+        // Defer heavy DOM injection of base64 images until after modal CSS transition finishes
+        setTimeout(() => {
+            // Render timeline
+            timeline.innerHTML = eq.history.map((h, index) => {
+                const isReceive = h.action === 'Recepción';
+                const iconColor = isReceive ? 'text-brand-500' : 'text-amber-500';
+                const bgColor = isReceive ? 'bg-brand-50' : 'bg-amber-50';
+                const date = new Date(h.timestamp).toLocaleString();
+
+                return `
+                <div class="relative pl-8">
+                    <!-- Timeline Dot -->
+                    <div class="absolute left-[-9px] top-1 w-4 h-4 rounded-full border-2 border-white ${bgColor} ${iconColor} flex items-center justify-center shadow-sm">
+                        <div class="w-1.5 h-1.5 rounded-full currentColor bg-current"></div>
+                    </div>
+                    
+                    <div class="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 dark:border-slate-700 rounded-xl p-4 shadow-sm">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <span class="font-bold text-gray-900 dark:text-white">${h.action}</span>
+                                <span class="text-sm text-gray-500 dark:text-gray-400 ml-2">${date}</span>
+                            </div>
+                        </div>
+                        <div class="text-sm text-gray-700 dark:text-gray-300 mb-3">
+                            <span class="font-medium">Empleado:</span> ${h.employee.name} (${h.employee.department})<br>
+                            ${h.condition ? `<span class="font-medium mt-1 inline-block">Estado Físico:</span> ${h.condition}` : ''}
+                        </div>
+                        ${h.observations ? `
+                            <div class="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-slate-900/50 p-3 rounded-lg mb-3 italic">
+                                "${h.observations}"
+                            </div>
+                        ` : ''}
+                        
+                        ${h.photo_url ? `
+                            <div class="mt-2 mb-3">
+                                <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-1">Evidencia Fotográfica</span>
+                                <img src="${h.photo_url}" class="h-32 object-contain border border-gray-200 rounded bg-white" alt="Foto">
+                            </div>
+                        ` : ''}
+                        
+                        <!-- Signature -->
+                        <div class="mt-2">
+                            <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-1">Firma</span>
+                            <img src="${h.signature_data}" class="h-24 w-full object-contain border border-gray-200 rounded-lg bg-white" alt="Firma">
+                        </div>
+                    </div>
+                </div>
+            `;
+            }).join('');
+        }, 300);
+
+    } catch (error) {
+        timeline.innerHTML = '<div class="text-sm text-red-500 pl-4">Error al cargar historial.</div>';
+    }
+}
 
 
 // --- Global History Modal ---

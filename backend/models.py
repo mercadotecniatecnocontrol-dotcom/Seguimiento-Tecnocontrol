@@ -18,7 +18,7 @@ class Equipment(Base):
     status = Column(String) # 'Recibido' or 'Despachado'
     observations = Column(String, nullable=True)
     condition = Column(String, nullable=True)
-    
+
     history = relationship("TrackingHistory", back_populates="equipment")
 
 class TrackingHistory(Base):

@@ -251,7 +251,7 @@ def export_equipments(db: Session = Depends(get_db)):
     ws.row_dimensions[4].height = 10 # Espacio en blanco
     
     # Headers
-    headers = ["Serie", "Artículo", "Estado", "Receptor", "Despachador", "Condición Físico", "Observaciones", "Evidencia (Foto)", "Firma Recepción", "Firma Salida"]
+    headers = ["Serie", "Artículo", "Estado", "Receptor", "Despachador", "Condición Físico", "Observaciones", "Foto Recepción", "Foto Salida", "Firma Recepción", "Firma Salida"]
     for col_idx, header in enumerate(headers, 1):
         ws.cell(row=5, column=col_idx, value=header)
     
@@ -265,15 +265,16 @@ def export_equipments(db: Session = Depends(get_db)):
         cell.alignment = Alignment(horizontal="center", vertical="center")
     
     # Set column widths
-    column_widths = [15, 25, 15, 20, 20, 15, 30, 25, 25, 25]
+    column_widths = [15, 25, 15, 20, 20, 15, 30, 20, 20, 25, 25]
     for i, column_width in enumerate(column_widths, 1):
         ws.column_dimensions[openpyxl.utils.get_column_letter(i)].width = column_width
 
     # Process data
     row_idx = 6
     for eq in equipments:
-        receive_hist = next((h for h in eq.history if h.action == 'Recepción'), None)
-        dispatch_hist = next((h for h in eq.history if h.action == 'Salida'), None)
+        sorted_history = sorted(eq.history, key=lambda x: x.timestamp, reverse=True)
+        receive_hist = next((h for h in sorted_history if h.action == 'Recepción'), None)
+        dispatch_hist = next((h for h in sorted_history if h.action == 'Salida'), None)
         
         ws.row_dimensions[row_idx].height = 80  # Height for images
         
@@ -314,21 +315,21 @@ def export_equipments(db: Session = Depends(get_db)):
             except Exception as e:
                 print(f"Image processing error: {e}")
 
-        # Evidencia (last action photo)
-        photo_b64 = None
+        # Foto Recepcion
+        if receive_hist and receive_hist.photo_url:
+            add_base64_image(receive_hist.photo_url, 8)
+            
+        # Foto Salida
         if dispatch_hist and dispatch_hist.photo_url:
-            photo_b64 = dispatch_hist.photo_url
-        elif receive_hist and receive_hist.photo_url:
-            photo_b64 = receive_hist.photo_url
-        add_base64_image(photo_b64, 8)
+            add_base64_image(dispatch_hist.photo_url, 9)
         
         # Signature Recepcion
         if receive_hist and receive_hist.signature_data:
-            add_base64_image(receive_hist.signature_data, 9)
+            add_base64_image(receive_hist.signature_data, 10)
             
         # Signature Salida
         if dispatch_hist and dispatch_hist.signature_data:
-            add_base64_image(dispatch_hist.signature_data, 10)
+            add_base64_image(dispatch_hist.signature_data, 11)
             
         row_idx += 1
 

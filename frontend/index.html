@@ -480,6 +480,27 @@
             </div>
         </div>
 
+        <!-- Details Modal -->
+        <div id="detailsModal"
+            class="bg-white dark:bg-slate-800 rounded-t-2xl md:rounded-xl shadow-xl w-full max-w-3xl transform translate-y-full md:translate-y-0 md:scale-95 opacity-0 transition-all duration-300 hidden overflow-hidden flex flex-col max-h-[95vh] md:max-h-[90vh]">
+            <div
+                class="p-6 border-b border-gray-100 dark:border-slate-700/50 flex justify-between items-center bg-gray-50 dark:bg-slate-900/50">
+                <div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white" id="detailSerial">Detalles del Equipo</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1" id="detailStatusBadge"></p>
+                </div>
+                <button type="button"
+                    class="btn-cancel text-gray-400 hover:text-gray-600 dark:text-gray-400 transition-colors bg-white dark:bg-slate-800 rounded-full p-2 shadow-sm border border-gray-100 dark:border-slate-700/50">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto flex-1 custom-scrollbar">
+                <div class="relative border-l-2 border-gray-200 dark:border-slate-700 ml-3 space-y-6" id="historyTimeline">
+                </div>
+            </div>
+        </div>
 
         <!-- Global History Modal -->
         <div id="globalHistoryModal"
@@ -540,7 +561,7 @@
 
     <div id="qr-reader-hidden" class="hidden"></div>
     <script type="text/javascript" src="https://unpkg.com/@zxing/browser@latest"></script>
-    <script src="app.js?v=36"></script>
+    <script src="app.js?v=39"></script>
 </body>
 
 </html>

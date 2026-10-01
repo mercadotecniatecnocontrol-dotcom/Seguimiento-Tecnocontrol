@@ -7,3 +7,5 @@ python-jose[cryptography]
 python-multipart
 openpyxl
 Pillow
+psycopg2-binary
+python-dotenv
